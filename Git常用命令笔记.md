@@ -81,6 +81,14 @@ git push -u origin main  # 首次推送：绑定上游，之后 pull / push 免�
 | `git pull` | 拉取并合并（= fetch + merge） |
 | `git push --force-with-lease` | 安全强推：远程有他人新提交时会被拒绝 ⚠️ |
 
+`想确认远程有没有新改动`
+
+远程更新 → 你不 fetch → origin/main 影子不变 → status 看不出差别
+远程更新 → 执行 git fetch → origin/main 影子刷新 → status 才会告诉你落后了
+
+>git fetch
+>git status
+
 ## 八、撤销与回退
 
 > 原则：按改动所处阶段选命令；已 push 的公共分支用 `revert`，不改写历史。
