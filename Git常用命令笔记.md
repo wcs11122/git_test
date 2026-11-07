@@ -1,6 +1,6 @@
 # Git 常用命令笔记
 
-> 纯命令行版 · Git Bash / PowerShell / CMD 通用
+> 纯命令行版 · Git Bash / PowerShell / CMD 通用 · 只用 `switch` / `restore` 等新命令
 
 ## 一、日常流程
 
@@ -9,12 +9,8 @@ git pull                 # 拉取远程最新
 git add .                # 改动加入暂存区
 git commit -m "说明"     # 提交到本地
 git push                 # 推送到远程
-```
 
-首次推送时绑定上游，之后 `pull` / `push` 免写分支名：
-
-```bash
-git push -u origin main
+git push -u origin main  # 首次推送：绑定上游，之后 pull / push 免写分支名
 ```
 
 提交说明：动词开头、说清改了什么，如 `修复登录接口空指针`。
@@ -80,7 +76,6 @@ git push -u origin main
 | `git remote add origin 地址` | 关联远程仓库 |
 | `git remote set-url origin 地址` | 修改远程地址 |
 | `git remote remove origin` | 取消关联 |
-| `git push -u origin main` | 首次推送并绑定上游 |
 | `git push` | 推送（已绑定上游） |
 | `git fetch origin` | 只下载更新，不合并 |
 | `git pull` | 拉取并合并（= fetch + merge） |
@@ -88,19 +83,23 @@ git push -u origin main
 
 ## 八、撤销与回退
 
-```bash
-git restore 文件            # 改了没 add：丢弃工作区改动（. 为全部）
-git restore --staged 文件   # add 了没 commit：撤出暂存区
+> 原则：按改动所处阶段选命令；已 push 的公共分支用 `revert`，不改写历史。
 
-git reset --soft HEAD~1     # commit 了没 push：撤 commit，改动留在暂存区
-git reset --mixed HEAD~1    # 撤 commit + 撤 add，改动留在工作区（默认）
-git reset --hard HEAD~1     # 撤 commit 并丢弃改动 ⚠️
-git reset --hard 提交ID     # 回到指定版本
+| 阶段 | 命令 | 结果 |
+|---|---|---|
+| 改了，没 add | `git restore 文件` | 丢弃工作区改动（`git restore .` 全部） |
+| add 了，没 commit | `git restore --staged 文件` | 撤出暂存区，改动回到工作区 |
+| commit 了，没 push | `git reset --soft HEAD~1` | 撤 commit，改动保留在暂存区 |
+| 同上 | `git reset --mixed HEAD~1` | 撤 commit + 撤 add，改动保留在工作区（默认） |
+| 同上 | `git reset --hard HEAD~1` | ⚠️ 撤 commit 并丢弃改动，找不回 |
+| 回退到指定版本 | `git reset --hard 提交ID` | ⚠️ 该版本之后的提交全部丢弃 |
+| 已 push | `git revert 提交ID` | 生成反向提交抵消，不改写历史 |
 
-git revert 提交ID           # 已 push：生成反向提交抵消，不改写历史
-```
+`HEAD` 指向当前最新提交；`HEAD~1` = 上一个提交，`HEAD~2` = 上两个提交；`提交ID` 是哈希值。
 
-`HEAD~1` = 上一个版本，`HEAD~2` = 上两个版本。
+- `restore` 是新命令，取代旧的 `checkout -- 文件`
+- `reset` 会移动 HEAD 指针、改写本地历史，`--hard` 丢掉的改动很难找回
+- `revert` 保留完整历史，团队协作首选
 
 ## 九、stash（不提交就切分支）
 
@@ -127,8 +126,6 @@ git stash pop      # 恢复改动
 node_modules/
 build/
 .env
-*.exe
-.DS_Store
 ```
 
 已提交过的文件要停止跟踪：
